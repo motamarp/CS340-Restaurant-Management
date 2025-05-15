@@ -7,22 +7,51 @@
 <body>
   <h1>Menu List</h1>
   <a href="index.html">Back to Home</a>
+
+  <form id="addMenuItemForm">
+    <h2>Add Menu Item</h2>
+    <label>Item Name: <input type="text" name="itemName" required></label>
+    <label>Price: <input type="number" step="0.01" name="price" required></label>
+    <label>Availability: <input type="checkbox" name="availability" checked></label>
+    <label>Category ID: <input type="number" name="categoryID" required></label>
+    <button type="submit">Add Item</button>
+  </form>
+
   <table>
-    <tr>
-      <th>Item Name</th><th>Price</th><th>Availability</th><th>Category ID</th>
-    </tr>
-    <tr>
-      <td>Cheeseburger</td><td>8.99</td><td>1</td><td>2</td>
-    </tr>
-    <tr>
-      <td>Caesar Salad</td><td>5.99</td><td>1</td><td>1</td>
-    </tr>
-    <tr>
-      <td>Chocolate Cake</td><td>4.50</td><td>1</td><td>4</td>
-    </tr>
-    <tr>
-      <td>Iced Tea</td><td>2.00</td><td>1</td><td>3</td>
-    </tr>
+    <thead>
+      <tr>
+        <th>Item Name</th><th>Price</th><th>Availability</th><th>Category ID</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="menuTableBody">
+      <tr>
+        <td>Cheeseburger</td><td>8.99</td><td>1</td><td>2</td>
+        <td><button onclick="deleteMenuItem(1)">Delete</button></td>
+      </tr>
+      <tr>
+        <td>Caesar Salad</td><td>5.99</td><td>1</td><td>1</td>
+        <td><button onclick="deleteMenuItem(2)">Delete</button></td>
+      </tr>
+      <tr>
+        <td>Chocolate Cake</td><td>4.50</td><td>1</td><td>4</td>
+        <td><button onclick="deleteMenuItem(3)">Delete</button></td>
+      </tr>
+      <tr>
+        <td>Iced Tea</td><td>2.00</td><td>1</td><td>3</td>
+        <td><button onclick="deleteMenuItem(4)">Delete</button></td>
+      </tr>
+    </tbody>
   </table>
+
+  <script>
+    function deleteMenuItem(id) {
+      console.log('Deleting menu item with ID:', id);
+    }
+
+    document.getElementById('addMenuItemForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      console.log('Adding menu item...');
+    });
+  </script>
 </body>
 </html>
