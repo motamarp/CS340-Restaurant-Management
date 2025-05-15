@@ -7,19 +7,47 @@
 <body>
   <h1>Customer List</h1>
   <a href="index.html">Back to Home</a>
+
+  <!-- INSERT FORM -->
+  <form id="addCustomerForm">
+    <h2>Add Customer</h2>
+    <label>Name: <input type="text" name="name" required></label>
+    <label>Email: <input type="email" name="email" required></label>
+    <label>Phone: <input type="text" name="phone"></label>
+    <button type="submit">Add Customer</button>
+  </form>
+
   <table>
-    <tr>
-      <th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Join Date</th>
-    </tr>
-    <tr>
-      <td>1</td><td>Alice Thompson</td><td>alice@example.com</td><td>555-1234</td><td>2024-03-15</td>
-    </tr>
-    <tr>
-      <td>2</td><td>Bob Martinez</td><td>bob.m@example.com</td><td>555-5678</td><td>2023-11-22</td>
-    </tr>
-    <tr>
-      <td>3</td><td>Carol Liu</td><td>carol.liu@example.com</td><td>N/A</td><td>2025-01-05</td>
-    </tr>
+    <thead>
+      <tr>
+        <th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Join Date</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="customerTableBody">
+      <tr>
+        <td>1</td><td>Alice Thompson</td><td>alice@example.com</td><td>555-1234</td><td>2024-03-15</td>
+        <td><button onclick="deleteCustomer(1)">Delete</button></td>
+      </tr>
+      <tr>
+        <td>2</td><td>Bob Martinez</td><td>bob.m@example.com</td><td>555-5678</td><td>2023-11-22</td>
+        <td><button onclick="deleteCustomer(2)">Delete</button></td>
+      </tr>
+      <tr>
+        <td>3</td><td>Carol Liu</td><td>carol.liu@example.com</td><td>N/A</td><td>2025-01-05</td>
+        <td><button onclick="deleteCustomer(3)">Delete</button></td>
+      </tr>
+    </tbody>
   </table>
+
+  <script>
+    function deleteCustomer(id) {
+      console.log('Deleting customer with ID:', id);
+    }
+
+    document.getElementById('addCustomerForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      console.log('Adding customer...');
+    });
+  </script>
 </body>
 </html>
