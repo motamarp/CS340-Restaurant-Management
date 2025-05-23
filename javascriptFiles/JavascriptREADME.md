@@ -1,0 +1,1 @@
+# All of the current js files I generated quickly with ai for a proof of concept and will fix/replace them later - Gavin

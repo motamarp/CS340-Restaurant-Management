@@ -1,0 +1,86 @@
+-- View menu items by category (parameterized)
+SELECT mi.itemName, mi.price, c.categoryName, mi.availability
+FROM MenuItems mi
+JOIN Categories c ON mi.categoryID = c.categoryID
+WHERE c.categoryName = $1;
+
+-- View transactions for a customer
+SELECT t.transactionID, t.transactionDate, t.transactionType, t.totalAmount
+FROM Transactions t
+WHERE t.customerID = $1;
+
+-- View transaction details
+SELECT td.quantity, mi.itemName, mi.price
+FROM TransactionDetails td
+JOIN MenuItems mi ON td.itemID = mi.itemID
+WHERE td.transactionID = $1;
+
+-- Add new customer (using CURRENT_DATE instead of CURDATE())
+INSERT INTO Customers (name, email, phone, joinDate)
+VALUES ($1, $2, $3, CURRENT_DATE);
+
+-- Add new employee
+INSERT INTO Employees (name, role, email, hireDate)
+VALUES ($1, $2, $3, $4);
+
+-- Add new menu item
+INSERT INTO MenuItems (itemName, price, availability, categoryID)
+VALUES ($1, $2, $3, $4);
+
+-- Add new transaction (NOW() works in both)
+INSERT INTO Transactions (transactionDate, transactionType, totalAmount, customerID, employeeID)
+VALUES (NOW(), $1, $2, $3, $4);
+
+-- Add items to transaction
+INSERT INTO TransactionDetails (transactionID, itemID, quantity)
+VALUES ($1, $2, $3);
+
+-- Update customer
+UPDATE Customers
+SET name = $1,
+    email = $2,
+    phone = $3
+WHERE customerID = $4;
+
+-- Update employee
+UPDATE Employees
+SET name = $1,
+    role = $2,
+    email = $3
+WHERE employeeID = $4;
+
+-- Update menu item
+UPDATE MenuItems
+SET itemName = $1,
+    price = $2,
+    availability = $3,
+    categoryID = $4
+WHERE itemID = $5;
+
+-- Update transaction
+UPDATE Transactions
+SET transactionType = $1,
+    totalAmount = $2,
+    customerID = $3,
+    employeeID = $4
+WHERE transactionID = $5;
+
+-- Delete customer
+DELETE FROM Customers
+WHERE customerID = $1;
+
+-- Delete employee
+DELETE FROM Employees
+WHERE employeeID = $1;
+
+-- Delete menu item
+DELETE FROM MenuItems
+WHERE itemID = $1;
+
+-- Delete transaction
+DELETE FROM Transactions
+WHERE transactionID = $1;
+
+-- Remove item from transaction
+DELETE FROM TransactionDetails
+WHERE transactionID = $1 AND itemID = $2;
