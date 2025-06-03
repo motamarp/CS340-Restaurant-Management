@@ -6,7 +6,7 @@ export const CustomerOperations = { // Temp comment
             .from('customers')
             .insert([{
                 ...customerData,
-                joinDate: new Date().toISOString()
+                joindate: new Date().toISOString()
             }])
             .select()
         
@@ -18,7 +18,7 @@ export const CustomerOperations = { // Temp comment
         const { data, error } = await supabase
             .from('customers')
             .select('*')
-            .order('joinDate', { ascending: false })
+            .order('joindate', { ascending: false })
         
         if (error) throw error
         return data
