@@ -57,5 +57,3 @@ export const CustomerOperations = { // Temp comment
     },
 
 }
-console.log("Supabase connection test:");
-console.log("Table list:", await supabase.from('pg_tables').select('*'));
