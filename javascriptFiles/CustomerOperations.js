@@ -3,7 +3,7 @@ import { supabase } from './supabaseConfig.js'
 export const CustomerOperations = { // Temp comment
     async addCustomer(customerData) {
         const { data, error } = await supabase
-            .from('Customers')
+            .from('customers')
             .insert([{
                 ...customerData,
                 joinDate: new Date().toISOString()
@@ -16,7 +16,7 @@ export const CustomerOperations = { // Temp comment
 
     async getAllCustomers() {
         const { data, error } = await supabase
-            .from('Customers')
+            .from('customers')
             .select('*')
             .order('joinDate', { ascending: false })
         
@@ -26,7 +26,7 @@ export const CustomerOperations = { // Temp comment
 
     async getCustomer(customerId) {
     const { data, error } = await supabase
-        .from('Customers')
+        .from('customers')
         .select('*')
         .eq('customerID', customerId)
         .single()
@@ -37,7 +37,7 @@ export const CustomerOperations = { // Temp comment
 
     async deleteCustomer(customerId) {
         const { error } = await supabase
-            .from('Customers')
+            .from('customers')
             .delete()
             .eq('customerID', customerId)
         
@@ -47,7 +47,7 @@ export const CustomerOperations = { // Temp comment
 
     async updateCustomer(customerId, updates) {
         const { data, error } = await supabase
-            .from('Customers')
+            .from('customers')
             .update(updates)
             .eq('customerID', customerId)
             .select()
