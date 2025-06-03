@@ -2,7 +2,7 @@
 import { supabase } from './supabaseConfig.js';
 
 export const DatabaseReset = {
-  resetDatabase: async function() {  // Fixed syntax here
+  resetDatabase: async function(){  // Comment to force website update
     const confirmation = confirm("WARNING: This will reset ALL data. Continue?");
     if (!confirmation) return;
     
