@@ -1,6 +1,8 @@
 import { supabase } from './supabaseConfig.js';
 
 export const CustomerOperations = {
+
+    
     // Add new customer
     addCustomer: async (customerData) => {
         const { data, error } = await supabase

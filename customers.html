@@ -18,36 +18,106 @@
   </form>
 
   <table>
-    <thead>
-      <tr>
-        <th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Join Date</th><th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="customerTableBody">
-      <tr>
-        <td>1</td><td>Alice Thompson</td><td>alice@example.com</td><td>555-1234</td><td>2024-03-15</td>
-        <td><button onclick="deleteCustomer(1)">Delete</button></td>
-      </tr>
-      <tr>
-        <td>2</td><td>Bob Martinez</td><td>bob.m@example.com</td><td>555-5678</td><td>2023-11-22</td>
-        <td><button onclick="deleteCustomer(2)">Delete</button></td>
-      </tr>
-      <tr>
-        <td>3</td><td>Carol Liu</td><td>carol.liu@example.com</td><td>N/A</td><td>2025-01-05</td>
-        <td><button onclick="deleteCustomer(3)">Delete</button></td>
-      </tr>
-    </tbody>
-  </table>
+  <thead>
+    <tr>
+      <th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Join Date</th><th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="customerTableBody">
+    <!-- Data will be inserted here by JavaScript -->
+  </tbody>
+</table>
 
   <script>
-    function deleteCustomer(id) {
-      console.log('Deleting customer with ID:', id);
+  // Function to load customers from Supabase
+  async function loadCustomers() {
+    const tbody = document.getElementById('customerTableBody');
+    tbody.innerHTML = '<tr><td colspan="6">Loading customers...</td></tr>';
+    
+    try {
+      const { data: customers, error } = await supabase
+        .from('Customers')
+        .select('*')
+        .order('customerID', { ascending: true });
+      
+      if (error) throw error;
+      
+      if (customers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6">No customers found</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = customers.map(customer => `
+        <tr>
+          <td>${customer.customerID}</td>
+          <td>${customer.name}</td>
+          <td>${customer.email}</td>
+          <td>${customer.phone || 'N/A'}</td>
+          <td>${new Date(customer.joinDate).toLocaleDateString()}</td>
+          <td><button onclick="deleteCustomer(${customer.customerID})">Delete</button></td>
+        </tr>
+      `).join('');
+    } catch (error) {
+      tbody.innerHTML = `<tr><td colspan="6" style="color:red">Error loading customers: ${error.message}</td></tr>`;
+      console.error('Error loading customers:', error);
     }
+  }
 
-    document.getElementById('addCustomerForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      console.log('Adding customer...');
-    });
-  </script>
+  // Function to delete a customer
+  async function deleteCustomer(id) {
+    if (!confirm('Are you sure you want to delete this customer?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('Customers')
+        .delete()
+        .eq('customerID', id);
+      
+      if (error) throw error;
+      
+      alert('Customer deleted successfully');
+      loadCustomers(); // Refresh the list
+    } catch (error) {
+      alert(`Error deleting customer: ${error.message}`);
+      console.error('Delete error:', error);
+    }
+  }
+
+  // Function to add a new customer
+  async function addCustomer(customerData) {
+    try {
+      const { error } = await supabase
+        .from('Customers')
+        .insert([{
+          ...customerData,
+          joinDate: new Date().toISOString()
+        }]);
+      
+      if (error) throw error;
+      
+      alert('Customer added successfully');
+      loadCustomers(); // Refresh the list
+    } catch (error) {
+      alert(`Error adding customer: ${error.message}`);
+      console.error('Add error:', error);
+    }
+  }
+
+  // Form submission handler
+  document.getElementById('addCustomerForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const customerData = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      phone: formData.get('phone')
+    };
+    addCustomer(customerData);
+    event.target.reset();
+  });
+
+  // Load customers when page loads
+  document.addEventListener('DOMContentLoaded', loadCustomers);
+</script>
 </body>
 </html>
