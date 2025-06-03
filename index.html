@@ -15,5 +15,18 @@
       <li><a href="transactions.html">Transactions</a></li>
     </ul>
   </nav>
+  <button id="resetDatabaseBtn">Reset Entire Database</button>
+  <div id="loading-message"></div>
+
+  <script type="module">
+    import { DatabaseReset } from './databaseReset.js';
+
+    document.getElementById('resetDatabaseBtn').addEventListener('click', async () => {
+      const result = await DatabaseReset.resetAllTables();
+      alert(result.message);
+      if (result.success && result.action) result.action();
+    });
+  </script>
 </body>
+
 </html>

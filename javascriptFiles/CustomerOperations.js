@@ -54,5 +54,6 @@ export const CustomerOperations = {
         
         if (error) throw error
         return data[0]
-    }
+    },
+
 }
