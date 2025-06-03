@@ -1,7 +1,7 @@
 //import { supabase } from './supabaseConfig.js';
 import * as Menu from './MenuOperations.js';
 import * as Customers from './CustomerOperations.js';
-import * as Transactions from './TransactionOperations.js';
+//import * as Transactions from './TransactionOperations.js';
 
 // Example usage
 document.addEventListener('DOMContentLoaded', async () => {
