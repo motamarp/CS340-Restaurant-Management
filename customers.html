@@ -74,7 +74,7 @@
             <td>${customer.name}</td>
             <td>${customer.email}</td>
             <td>${customer.phone || '-'}</td>
-            <td>${new Date(customer.joinDate).toLocaleDateString()}</td>
+            <td>${new Date(customer.joindate).toLocaleDateString()}</td>
             <td>
               <button class="edit-btn" data-id="${customer.customerID}">Edit</button>
               <button class="delete-btn" data-id="${customer.customerID}">Delete</button>
