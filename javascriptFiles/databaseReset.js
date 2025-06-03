@@ -1,19 +1,22 @@
-// databaseReset.js
 import { supabase } from './supabaseConfig.js';
 
 export const DatabaseReset = {
-  resetDatabase: async function(){  // Comment to force website update
-    const confirmation = confirm("WARNING: This will reset ALL data. Continue?");
-    if (!confirmation) return;
-    
+  async resetAllTables() {
     try {
       const { error } = await supabase.rpc('reset_restaurant_database');
+      
       if (error) throw error;
-      alert('Database reset successfully!');
-      window.location.reload();
+      
+      return {
+        success: true,
+        message: 'Database reset successfully',
+        action: () => window.location.reload()
+      };
     } catch (error) {
-      console.error('Reset failed:', error);
-      alert(`Reset failed: ${error.message}`);
+      return {
+        success: false,
+        message: `Reset failed: ${error.message}`
+      };
     }
   }
 };
