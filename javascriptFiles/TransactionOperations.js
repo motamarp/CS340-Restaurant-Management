@@ -1,6 +1,6 @@
 import { supabase } from './supabaseConfig.js';
 
-export const TransactionOperations = {
+export const transactionOperations = {
     // Create new transaction
     createTransaction: async (transactionData) => {
         const { data, error } = await supabase
