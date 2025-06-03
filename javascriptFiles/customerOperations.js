@@ -1,6 +1,6 @@
 import { supabase } from './supabaseConfig.js'
 
-export const CustomerOperations = {
+export const CustomerOperations = { // Temp comment
     async addCustomer(customerData) {
         const { data, error } = await supabase
             .from('Customers')
