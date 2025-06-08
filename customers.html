@@ -70,14 +70,14 @@
         
         customerTableBody.innerHTML = customers.map(customer => `
           <tr>
-            <td>${customer.customerID}</td>
+            <td>${customer.customerid}</td>
             <td>${customer.name}</td>
             <td>${customer.email}</td>
             <td>${customer.phone || '-'}</td>
             <td>${new Date(customer.joindate).toLocaleDateString()}</td>
             <td>
-              <button class="edit-btn" data-id="${customer.customerID}">Edit</button>
-              <button class="delete-btn" data-id="${customer.customerID}">Delete</button>
+              <button class="edit-btn" data-id="${customer.customerid}">Edit</button>
+              <button class="delete-btn" data-id="${customer.customerid}">Delete</button>
             </td>
           </tr>
         `).join('')

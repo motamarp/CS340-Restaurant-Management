@@ -28,7 +28,7 @@ export const CustomerOperations = { // Temp comment
     const { data, error } = await supabase
         .from('customers')
         .select('*')
-        .eq('customerID', customerId)
+        .eq('customerid', customerId)
         .single()
     
     if (error) throw error
@@ -39,7 +39,7 @@ export const CustomerOperations = { // Temp comment
         const { error } = await supabase
             .from('customers')
             .delete()
-            .eq('customerID', customerId)
+            .eq('customerid', customerId)
         
         if (error) throw error
         return true
@@ -49,7 +49,7 @@ export const CustomerOperations = { // Temp comment
         const { data, error } = await supabase
             .from('customers')
             .update(updates)
-            .eq('customerID', customerId)
+            .eq('customerid', customerId)
             .select()
         
         if (error) throw error
