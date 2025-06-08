@@ -106,15 +106,15 @@
         email: formData.get('email'),
         phone: formData.get('phone')
       };
-  
+      
       try {
         if (customerForm.dataset.editId) {
-          // Update existing customer
+          // UPDATE existing customer
           await CustomerOperations.updateCustomer(customerForm.dataset.editId, customerData);
           delete customerForm.dataset.editId;
           customerForm.querySelector('button').textContent = 'Add Customer';
         } else {
-          // Add new customer
+          // CREATE new customer
           await CustomerOperations.addCustomer(customerData);
         }
         customerForm.reset();
@@ -138,7 +138,7 @@
       customerForm.email.value = customer.email;
       customerForm.phone.value = customer.phone || '';
       
-      // Change form to update mode
+      // Set edit mode
       customerForm.dataset.editId = customerId;
       customerForm.querySelector('button').textContent = 'Update Customer';
     }

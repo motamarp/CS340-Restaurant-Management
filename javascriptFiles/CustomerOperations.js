@@ -45,31 +45,16 @@ export const CustomerOperations = { // Temp comment
         return true
     },
 
+    // Update customer details
     async updateCustomer(customerId, updates) {
-    // If email is being changed, verify it doesn't exist
-    if (updates.email) {
-        const { data: existing, error } = await supabase
-            .from('customers')
-            .select('customerid')
-            .eq('email', updates.email)
-            .neq('customerid', customerId)
-            .maybeSingle();
-        
-        if (error) throw error;
-        if (existing) {
-            throw new Error('Email already in use by another customer');
-        }
-    }
-
-    // Perform normal update
     const { data, error } = await supabase
-        .from('customers')
+        .from('customers')  // Make sure this matches your table name
         .update(updates)
-        .eq('customerid', customerId)
+        .eq('customerid', customerId)  // Match your ID column name
         .select();
     
     if (error) throw error;
-        return data[0];
-    }
+    return data[0];
+},
 
 }
