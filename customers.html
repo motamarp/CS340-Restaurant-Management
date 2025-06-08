@@ -29,43 +29,50 @@
   </table>
 
   <script type="module">
-    // This line isn't being updated on the site for some reason?
     import { CustomerOperations } from './javascriptFiles/CustomerOperations.js';
 
     // DOM Elements
-    const customerForm = document.getElementById('addCustomerForm')
-    const customerTableBody = document.getElementById('customerTableBody')
+    const customerForm = document.getElementById('addCustomerForm');
+    const customerTableBody = document.getElementById('customerTableBody');
 
-    // Form submission handler
+    // Single form submission handler
     customerForm.addEventListener('submit', async (event) => {
-      event.preventDefault()
-      const formData = new FormData(event.target)
+      event.preventDefault();
+      const formData = new FormData(event.target);
       const customerData = {
         name: formData.get('name'),
         email: formData.get('email'),
         phone: formData.get('phone')
-      }
+      };
       
       try {
-        await CustomerOperations.addCustomer(customerData)
-        event.target.reset()
-        await renderCustomers()
+        if (customerForm.dataset.editId) {
+          // Update existing customer
+          await CustomerOperations.updateCustomer(customerForm.dataset.editId, customerData);
+          delete customerForm.dataset.editId;
+          customerForm.querySelector('button').textContent = 'Add Customer';
+        } else {
+          // Add new customer
+          await CustomerOperations.addCustomer(customerData);
+        }
+        customerForm.reset();
+        await renderCustomers();
       } catch (error) {
-        console.error('Error adding customer:', error)
-        alert(`Failed to add customer: ${error.message}`)
+        console.error('Error:', error);
+        alert(`Operation failed: ${error.message}`);
       }
-    })
+    });
 
     // Render customers to the table
     async function renderCustomers() {
       try {
-        customerTableBody.innerHTML = '<tr><td colspan="6">Loading customers...</td></tr>'
+        customerTableBody.innerHTML = '<tr><td colspan="6">Loading customers...</td></tr>';
         
-        const customers = await CustomerOperations.getAllCustomers()
+        const customers = await CustomerOperations.getAllCustomers();
         
         if (!customers || customers.length === 0) {
-          customerTableBody.innerHTML = '<tr><td colspan="6">No customers found</td></tr>'
-          return
+          customerTableBody.innerHTML = '<tr><td colspan="6">No customers found</td></tr>';
+          return;
         }
         
         customerTableBody.innerHTML = customers.map(customer => `
@@ -80,55 +87,24 @@
               <button class="delete-btn" data-id="${customer.customerid}">Delete</button>
             </td>
           </tr>
-        `).join('')
+        `).join('');
 
         // Add event listeners to all buttons
         document.querySelectorAll('.delete-btn').forEach(btn => {
-          btn.addEventListener('click', handleDelete)
-        })
+          btn.addEventListener('click', handleDelete);
+        });
         
         document.querySelectorAll('.edit-btn').forEach(btn => {
-          btn.addEventListener('click', handleEdit)
-        })
+          btn.addEventListener('click', handleEdit);
+        });
         
       } catch (error) {
-        console.error('Error loading customers:', error)
-        customerTableBody.innerHTML = '<tr><td colspan="6">Error loading customers</td></tr>'
+        console.error('Error loading customers:', error);
+        customerTableBody.innerHTML = '<tr><td colspan="6">Error loading customers</td></tr>';
       }
     }
 
-    // Store the original submit handler
-    const originalSubmitHandler = async (event) => {
-      event.preventDefault();
-      const formData = new FormData(event.target);
-      const customerData = {
-        name: formData.get('name'),
-        email: formData.get('email'),
-        phone: formData.get('phone')
-      };
-      
-      try {
-        if (customerForm.dataset.editId) {
-          // UPDATE existing customer
-          await CustomerOperations.updateCustomer(customerForm.dataset.editId, customerData);
-          delete customerForm.dataset.editId;
-          customerForm.querySelector('button').textContent = 'Add Customer';
-        } else {
-          // CREATE new customer
-          await CustomerOperations.addCustomer(customerData);
-        }
-        customerForm.reset();
-        await renderCustomers();
-      } catch (error) {
-        console.error('Error:', error);
-        alert(`Operation failed: ${error.message}`);
-      }
-    };
-
-    // Set up the form with just one handler
-    customerForm.addEventListener('submit', originalSubmitHandler);
-
-    // Modified handleEdit function
+    // Handle edit
     async function handleEdit(event) {
       const customerId = event.target.dataset.id;
       const customer = await CustomerOperations.getCustomer(customerId);
@@ -138,27 +114,27 @@
       customerForm.email.value = customer.email;
       customerForm.phone.value = customer.phone || '';
       
-      // Set edit mode
+      // Change form to update mode
       customerForm.dataset.editId = customerId;
       customerForm.querySelector('button').textContent = 'Update Customer';
     }
 
     // Handle delete
     async function handleDelete(event) {
-      const customerId = event.target.dataset.id
+      const customerId = event.target.dataset.id;
       if (confirm('Are you sure you want to delete this customer?')) {
         try {
-          await CustomerOperations.deleteCustomer(customerId)
-          await renderCustomers()
+          await CustomerOperations.deleteCustomer(customerId);
+          await renderCustomers();
         } catch (error) {
-          console.error('Error deleting customer:', error)
-          alert(`Failed to delete customer: ${error.message}`)
+          console.error('Error deleting customer:', error);
+          alert(`Failed to delete customer: ${error.message}`);
         }
       }
     }
 
     // Load customers when page loads
-    document.addEventListener('DOMContentLoaded', renderCustomers)
+    document.addEventListener('DOMContentLoaded', renderCustomers);
   </script>
 </body>
 </html>
