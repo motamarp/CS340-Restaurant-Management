@@ -18,7 +18,7 @@ export const CustomerOperations = { // Temp comment
         const { data, error } = await supabase
             .from('customers')
             .select('*')
-            .order('joindate', { ascending: false })
+            .order('customerid', { ascending: true })
         
         if (error) throw error
         return data
@@ -46,14 +46,30 @@ export const CustomerOperations = { // Temp comment
     },
 
     async updateCustomer(customerId, updates) {
-        const { data, error } = await supabase
+    // If email is being changed, verify it doesn't exist
+    if (updates.email) {
+        const { data: existing, error } = await supabase
             .from('customers')
-            .update(updates)
-            .eq('customerid', customerId)
-            .select()
+            .select('customerid')
+            .eq('email', updates.email)
+            .neq('customerid', customerId)
+            .maybeSingle();
         
-        if (error) throw error
-        return data[0]
-    },
+        if (error) throw error;
+        if (existing) {
+            throw new Error('Email already in use by another customer');
+        }
+    }
+
+    // Perform normal update
+    const { data, error } = await supabase
+        .from('customers')
+        .update(updates)
+        .eq('customerid', customerId)
+        .select();
+    
+    if (error) throw error;
+        return data[0];
+    }
 
 }
