@@ -97,42 +97,50 @@
       }
     }
 
-    // Handle edit
+    // Store the original submit handler
+    const originalSubmitHandler = async (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const customerData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone')
+      };
+  
+      try {
+        if (customerForm.dataset.editId) {
+          // Update existing customer
+          await CustomerOperations.updateCustomer(customerForm.dataset.editId, customerData);
+          delete customerForm.dataset.editId;
+          customerForm.querySelector('button').textContent = 'Add Customer';
+        } else {
+          // Add new customer
+          await CustomerOperations.addCustomer(customerData);
+        }
+        customerForm.reset();
+        await renderCustomers();
+      } catch (error) {
+        console.error('Error:', error);
+        alert(`Operation failed: ${error.message}`);
+      }
+    };
+
+    // Set up the form with just one handler
+    customerForm.addEventListener('submit', originalSubmitHandler);
+
+    // Modified handleEdit function
     async function handleEdit(event) {
-      const customerId = event.target.dataset.id
-      const customer = await CustomerOperations.getCustomer(customerId)
+      const customerId = event.target.dataset.id;
+      const customer = await CustomerOperations.getCustomer(customerId);
       
       // Fill form with customer data
-      customerForm.name.value = customer.name
-      customerForm.email.value = customer.email
-      customerForm.phone.value = customer.phone || ''
+      customerForm.name.value = customer.name;
+      customerForm.email.value = customer.email;
+      customerForm.phone.value = customer.phone || '';
       
       // Change form to update mode
-      customerForm.dataset.editId = customerId
-      customerForm.querySelector('button').textContent = 'Update Customer'
-      
-      // Change submit handler temporarily
-      customerForm.onsubmit = async (e) => {
-        e.preventDefault()
-        const formData = new FormData(customerForm)
-        const updates = {
-          name: formData.get('name'),
-          email: formData.get('email'),
-          phone: formData.get('phone')
-        }
-        
-        try {
-          await CustomerOperations.updateCustomer(customerId, updates)
-          customerForm.reset()
-          delete customerForm.dataset.editId
-          customerForm.querySelector('button').textContent = 'Add Customer'
-          customerForm.onsubmit = arguments.callee // Reset to original handler
-          await renderCustomers()
-        } catch (error) {
-          console.error('Error updating customer:', error)
-          alert(`Failed to update customer: ${error.message}`)
-        }
-      }
+      customerForm.dataset.editId = customerId;
+      customerForm.querySelector('button').textContent = 'Update Customer';
     }
 
     // Handle delete
