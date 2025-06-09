@@ -43,8 +43,7 @@ export const EmployeeOperations = {
           {
             name: employeeData.name,
             email: employeeData.email,
-            position: employeeData.position,
-            department: employeeData.department,
+            role: employeeData.role,
             hiredate: new Date().toISOString()
           }
         ]);
@@ -65,8 +64,7 @@ export const EmployeeOperations = {
         .update({
           name: employeeData.name,
           email: employeeData.email,
-          position: employeeData.position,
-          department: employeeData.department
+          role: employeeData.role
         })
         .eq('employeeid', employeeId);
       
