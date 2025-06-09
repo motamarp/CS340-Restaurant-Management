@@ -6,13 +6,7 @@ export const TransactionOperations = {
     try {
       const { data, error } = await supabase
         .from('transactions')
-        .select(`
-          transactionid,
-          transactiondate,
-          totalamount,
-          customerid,
-          employeeid
-        `)
+        .select('*')
         .order('transactionid', { ascending: true });
       
       if (error) throw error;
@@ -23,46 +17,70 @@ export const TransactionOperations = {
     }
   },
 
-  // Get transaction details including menu items
-  async getTransactionDetails(transactionId) {
+  // Get a single transaction by ID
+  async getTransaction(transactionId) {
     try {
-      // Get the transaction header
-      const { data: transaction, error: headerError } = await supabase
+      const { data, error } = await supabase
         .from('transactions')
         .select('*')
         .eq('transactionid', transactionId)
         .single();
-
-      if (headerError) throw headerError;
-
-      // Get the transaction items
-      const { data: items, error: itemsError } = await supabase
-        .from('transactiondetails')
-        .select(`
-          quantity,
-          menuitems (itemname, price)
-        `)
-        .eq('transactionid', transactionId);
-
-      if (itemsError) throw itemsError;
-
-      return {
-        ...transaction,
-        items: items.map(item => ({
-          ...item.menuitems,
-          quantity: item.quantity
-        }))
-      };
+      
+      if (error) throw error;
+      return data;
     } catch (error) {
-      console.error(`Error fetching transaction ${transactionId} details:`, error.message);
+      console.error(`Error fetching transaction ${transactionId}:`, error.message);
       throw error;
     }
   },
 
-  // Delete a transaction and its details
+  // Add a new transaction
+  async addTransaction(transactionData) {
+    try {
+      const { data, error } = await supabase
+        .from('transactions')
+        .insert([{
+          transactiondate: transactionData.transactiondate,
+          transactiontype: transactionData.transactiontype,
+          totalamount: transactionData.totalamount,
+          customerid: transactionData.customerid,
+          employeeid: transactionData.employeeid
+        }]);
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error adding transaction:', error.message);
+      throw error;
+    }
+  },
+
+  // Update an existing transaction
+  async updateTransaction(transactionId, transactionData) {
+    try {
+      const { data, error } = await supabase
+        .from('transactions')
+        .update({
+          transactiondate: transactionData.transactiondate,
+          transactiontype: transactionData.transactiontype,
+          totalamount: transactionData.totalamount,
+          customerid: transactionData.customerid,
+          employeeid: transactionData.employeeid
+        })
+        .eq('transactionid', transactionId);
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error(`Error updating transaction ${transactionId}:`, error.message);
+      throw error;
+    }
+  },
+
+  // Delete a transaction
   async deleteTransaction(transactionId) {
     try {
-      // First delete the transaction details
+      // First delete related transaction details
       const { error: detailsError } = await supabase
         .from('transactiondetails')
         .delete()
@@ -70,12 +88,12 @@ export const TransactionOperations = {
 
       if (detailsError) throw detailsError;
 
-      // Then delete the transaction header
+      // Then delete the transaction
       const { data, error } = await supabase
         .from('transactions')
         .delete()
         .eq('transactionid', transactionId);
-
+      
       if (error) throw error;
       return data;
     } catch (error) {
@@ -84,24 +102,21 @@ export const TransactionOperations = {
     }
   },
 
-  // Create a new transaction (you can expand this as needed)
-  async createTransaction(transactionData) {
+  // Get transaction details with menu items
+  async getTransactionDetails(transactionId) {
     try {
       const { data, error } = await supabase
-        .from('transactions')
-        .insert([{
-          transactiondate: new Date().toISOString(),
-          transactiontype: transactionData.type || 'sale',
-          totalamount: transactionData.totalAmount,
-          customerid: transactionData.customerId,
-          employeeid: transactionData.employeeId
-        }])
-        .select();
-
+        .from('transactiondetails')
+        .select(`
+          quantity,
+          menuitems (itemid, itemname, price)
+        `)
+        .eq('transactionid', transactionId);
+      
       if (error) throw error;
-      return data[0];
+      return data;
     } catch (error) {
-      console.error('Error creating transaction:', error.message);
+      console.error(`Error fetching details for transaction ${transactionId}:`, error.message);
       throw error;
     }
   }

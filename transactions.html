@@ -1,106 +1,188 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Transaction Management</title>
-    <link rel="stylesheet" href="style.css">
-  </head>
-  <body>
-    <h1>Transaction Management</h1>
-    <a href="index.html">Back to Home</a>
+<head>
+  <title>Transaction Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Transaction Management</h1>
+  <a href="index.html">Back to Home</a>
 
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Date</th>
-          <th>Total Amount</th>
-          <th>Customer ID</th>
-          <th>Employee ID</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="transactionTableBody">
-        <!-- Transaction data will be loaded here -->
-      </tbody>
-    </table>
+  <!-- Transaction Form -->
+  <form id="addTransactionForm">
+    <h2>Add/Edit Transaction</h2>
+    <label>
+      Transaction Date: 
+      <input type="datetime-local" name="transactiondate" required>
+    </label>
+    <label>
+      Transaction Type:
+      <select name="transactiontype" required>
+        <option value="sale">Sale</option>
+        <option value="return">Return</option>
+        <option value="refund">Refund</option>
+      </select>
+    </label>
+    <label>
+      Customer ID: 
+      <input type="number" name="customerid">
+    </label>
+    <label>
+      Employee ID: 
+      <input type="number" name="employeeid" required>
+    </label>
+    <label>
+      Total Amount: 
+      <input type="number" name="totalamount" step="0.01" min="0" required>
+    </label>
+    <button type="submit">Add Transaction</button>
+  </form>
 
-    <script type="module">
-      import { TransactionOperations } from './javascriptFiles/TransactionOperations.js';
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Total Amount</th>
+        <th>Customer ID</th>
+        <th>Employee ID</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="transactionTableBody">
+      <!-- Transaction data will be loaded here -->
+    </tbody>
+  </table>
 
-      // DOM Elements
-      const transactionTableBody = document.getElementById('transactionTableBody');
+  <script type="module">
+    import { TransactionOperations } from './javascriptFiles/TransactionOperations.js';
 
-      // Format date for display
-      function formatDate(dateString) {
-        const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
+    // DOM Elements
+    const transactionForm = document.getElementById('addTransactionForm');
+    const transactionTableBody = document.getElementById('transactionTableBody');
+
+    // Format date for display
+    function formatDate(dateString) {
+      const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    }
+
+    // Form submission handler
+    transactionForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      
+      // Convert datetime-local input to ISO string
+      const transactionDate = new Date(formData.get('transactiondate')).toISOString();
+      
+      const transactionData = {
+        transactiondate: transactionDate,
+        transactiontype: formData.get('transactiontype'),
+        totalamount: parseFloat(formData.get('totalamount')),
+        customerid: formData.get('customerid') ? parseInt(formData.get('customerid')) : null,
+        employeeid: parseInt(formData.get('employeeid'))
+      };
+      
+      try {
+        if (transactionForm.dataset.editId) {
+          // Update existing transaction
+          await TransactionOperations.updateTransaction(transactionForm.dataset.editId, transactionData);
+          delete transactionForm.dataset.editId;
+          transactionForm.querySelector('button').textContent = 'Add Transaction';
+        } else {
+          // Add new transaction
+          await TransactionOperations.addTransaction(transactionData);
+        }
+        transactionForm.reset();
+        await renderTransactions();
+      } catch (error) {
+        console.error('Error:', error);
+        alert(`Operation failed: ${error.message}`);
       }
+    });
 
-      // Render transactions to the table
-      async function renderTransactions() {
+    // Render transactions to the table
+    async function renderTransactions() {
+      try {
+        transactionTableBody.innerHTML = '<tr><td colspan="7">Loading transactions...</td></tr>';
+        
+        const transactions = await TransactionOperations.getAllTransactions();
+        
+        if (!transactions || transactions.length === 0) {
+          transactionTableBody.innerHTML = '<tr><td colspan="7">No transactions found</td></tr>';
+          return;
+        }
+        
+        transactionTableBody.innerHTML = transactions.map(transaction => `
+          <tr>
+            <td>${transaction.transactionid}</td>
+            <td>${formatDate(transaction.transactiondate)}</td>
+            <td>${transaction.transactiontype}</td>
+            <td>$${transaction.totalamount.toFixed(2)}</td>
+            <td>${transaction.customerid || 'N/A'}</td>
+            <td>${transaction.employeeid || 'N/A'}</td>
+            <td class="action-btns">
+              <button class="edit-btn" data-id="${transaction.transactionid}">Edit</button>
+              <button class="delete-btn" data-id="${transaction.transactionid}">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+
+        // Add event listeners to buttons
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', handleDelete);
+        });
+        
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+          btn.addEventListener('click', handleEdit);
+        });
+        
+      } catch (error) {
+        console.error('Error loading transactions:', error);
+        transactionTableBody.innerHTML = '<tr><td colspan="7">Error loading transactions</td></tr>';
+      }
+    }
+
+    // Handle edit
+    async function handleEdit(event) {
+      const transactionId = event.target.dataset.id;
+      const transaction = await TransactionOperations.getTransaction(transactionId);
+      
+      // Fill form with transaction data
+      // Convert ISO date to datetime-local format
+      const date = new Date(transaction.transactiondate);
+      const localDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+                          .toISOString()
+                          .slice(0, 16);
+      
+      transactionForm.transactiondate.value = localDateTime;
+      transactionForm.transactiontype.value = transaction.transactiontype;
+      transactionForm.totalamount.value = transaction.totalamount;
+      transactionForm.customerid.value = transaction.customerid || '';
+      transactionForm.employeeid.value = transaction.employeeid;
+      
+      // Change form to update mode
+      transactionForm.dataset.editId = transactionId;
+      transactionForm.querySelector('button').textContent = 'Update Transaction';
+    }
+
+    // Handle delete
+    async function handleDelete(event) {
+      const transactionId = event.target.dataset.id;
+      if (confirm('Are you sure you want to delete this transaction?')) {
         try {
-          transactionTableBody.innerHTML = '<tr><td colspan="6">Loading transactions...</td></tr>';
-          
-          const transactions = await TransactionOperations.getAllTransactions();
-          
-          if (!transactions || transactions.length === 0) {
-            transactionTableBody.innerHTML = '<tr><td colspan="6">No transactions found</td></tr>';
-            return;
-          }
-          
-          transactionTableBody.innerHTML = transactions.map(transaction => `
-            <tr>
-              <td>${transaction.transactionid}</td>
-              <td>${formatDate(transaction.transactiondate)}</td>
-              <td>$${transaction.totalamount.toFixed(2)}</td>
-              <td>${transaction.customerid || 'N/A'}</td>
-              <td>${transaction.employeeid || 'N/A'}</td>
-              <td class="action-btns">
-                <button class="details-btn" data-id="${transaction.transactionid}">Details</button>
-                <button class="delete-btn" data-id="${transaction.transactionid}">Delete</button>
-              </td>
-            </tr>
-          `).join('');
-
-          // Add event listeners to buttons
-          document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', handleDelete);
-          });
-          
-          document.querySelectorAll('.details-btn').forEach(btn => {
-            btn.addEventListener('click', handleDetails);
-          });
-          
+          await TransactionOperations.deleteTransaction(transactionId);
+          await renderTransactions();
         } catch (error) {
-          console.error('Error loading transactions:', error);
-          transactionTableBody.innerHTML = '<tr><td colspan="6">Error loading transactions</td></tr>';
+          console.error('Error deleting transaction:', error);
+          alert(`Failed to delete transaction: ${error.message}`);
         }
       }
+    }
 
-      // Handle view details
-      async function handleDetails(event) {
-        const transactionId = event.target.dataset.id;
-        // You can implement a modal or redirect to show transaction details
-        alert(`Viewing details for transaction ${transactionId}`);
-        // Example: window.location.href = `transaction-details.html?id=${transactionId}`;
-      }
-
-      // Handle delete
-      async function handleDelete(event) {
-        const transactionId = event.target.dataset.id;
-        if (confirm('Are you sure you want to delete this transaction?')) {
-          try {
-            await TransactionOperations.deleteTransaction(transactionId);
-            await renderTransactions();
-          } catch (error) {
-            console.error('Error deleting transaction:', error);
-            alert(`Failed to delete transaction: ${error.message}`);
-          }
-        }
-      }
-
-      // Load transactions when page loads
-      document.addEventListener('DOMContentLoaded', renderTransactions);
-    </script>
-  </body>
+    // Load transactions when page loads
+    document.addEventListener('DOMContentLoaded', renderTransactions);
+  </script>
+</body>
 </html>
