@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient.js';
+import { supabase } from './supabaseConfig.js';
 
 export const EmployeeOperations = {
   // Get all employees
