@@ -99,14 +99,14 @@
         
         menuTableBody.innerHTML = menuItems.map(item => `
           <tr>
-            <td>${item.menuid}</td>
+            <td>${item.itemid}</td>  <!-- Changed from menuid to itemid -->
             <td>${item.itemname}</td>
             <td>$${item.price.toFixed(2)}</td>
             <td>${item.availability ? '✅ Available' : '❌ Unavailable'}</td>
             <td>${item.categoryid}</td>
             <td class="action-btns">
-              <button class="edit-btn" data-id="${item.menuid}">Edit</button>
-              <button class="delete-btn" data-id="${item.menuid}">Delete</button>
+              <button class="edit-btn" data-id="${item.itemid}">Edit</button>  <!-- Changed from menuid to itemid -->
+              <button class="delete-btn" data-id="${item.itemid}">Delete</button>  <!-- Changed from menuid to itemid -->
             </td>
           </tr>
         `).join('');
@@ -128,8 +128,8 @@
 
     // Handle edit
     async function handleEdit(event) {
-      const menuId = event.target.dataset.id;
-      const menuItem = await MenuOperations.getMenuItem(menuId);
+      const itemId = event.target.dataset.id;  // Changed variable name from menuId to itemId
+      const menuItem = await MenuOperations.getMenuItem(itemId);
       
       // Fill form with menu item data
       menuForm.itemname.value = menuItem.itemname;
@@ -138,16 +138,16 @@
       menuForm.categoryid.value = menuItem.categoryid;
       
       // Change form to update mode
-      menuForm.dataset.editId = menuId;
+      menuForm.dataset.editId = itemId;
       menuForm.querySelector('button').textContent = 'Update Menu Item';
     }
 
     // Handle delete
     async function handleDelete(event) {
-      const menuId = event.target.dataset.id;
+      const itemId = event.target.dataset.id;  // Changed variable name from menuId to itemId
       if (confirm('Are you sure you want to delete this menu item?')) {
         try {
-          await MenuOperations.deleteMenuItem(menuId);
+          await MenuOperations.deleteMenuItem(itemId);
           await renderMenuItems();
         } catch (error) {
           console.error('Error deleting menu item:', error);

@@ -5,9 +5,9 @@ export const MenuOperations = {
   async getAllMenuItems() {
     try {
       const { data, error } = await supabase
-        .from('menuitems')  // Changed from 'menu' to 'menuitems'
+        .from('menuitems')
         .select('*')
-        .order('menuid', { ascending: true });
+        .order('itemid', { ascending: true });  // Changed from menuid to itemid
       
       if (error) throw error;
       return data;
@@ -18,18 +18,18 @@ export const MenuOperations = {
   },
 
   // Get a single menu item by ID
-  async getMenuItem(menuId) {
+  async getMenuItem(itemId) {  // Changed parameter name from menuId to itemId
     try {
       const { data, error } = await supabase
-        .from('menuitems')  // Changed from 'menu' to 'menuitems'
+        .from('menuitems')
         .select('*')
-        .eq('menuid', menuId)
+        .eq('itemid', itemId)  // Changed from menuid to itemid
         .single();
       
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error(`Error fetching menu item ${menuId}:`, error.message);
+      console.error(`Error fetching menu item ${itemId}:`, error.message);
       throw error;
     }
   },
@@ -38,7 +38,7 @@ export const MenuOperations = {
   async addMenuItem(menuData) {
     try {
       const { data, error } = await supabase
-        .from('menuitems')  // Changed from 'menu' to 'menuitems'
+        .from('menuitems')
         .insert([{
           itemname: menuData.itemname,
           price: menuData.price,
@@ -55,38 +55,38 @@ export const MenuOperations = {
   },
 
   // Update an existing menu item
-  async updateMenuItem(menuId, menuData) {
+  async updateMenuItem(itemId, menuData) {  // Changed parameter name from menuId to itemId
     try {
       const { data, error } = await supabase
-        .from('menuitems')  // Changed from 'menu' to 'menuitems'
+        .from('menuitems')
         .update({
           itemname: menuData.itemname,
           price: menuData.price,
           availability: menuData.availability,
           categoryid: menuData.categoryid
         })
-        .eq('menuid', menuId);
+        .eq('itemid', itemId);  // Changed from menuid to itemid
       
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error(`Error updating menu item ${menuId}:`, error.message);
+      console.error(`Error updating menu item ${itemId}:`, error.message);
       throw error;
     }
   },
 
   // Delete a menu item
-  async deleteMenuItem(menuId) {
+  async deleteMenuItem(itemId) {  // Changed parameter name from menuId to itemId
     try {
       const { data, error } = await supabase
-        .from('menuitems')  // Changed from 'menu' to 'menuitems'
+        .from('menuitems')
         .delete()
-        .eq('menuid', menuId);
+        .eq('itemid', itemId);  // Changed from menuid to itemid
       
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error(`Error deleting menu item ${menuId}:`, error.message);
+      console.error(`Error deleting menu item ${itemId}:`, error.message);
       throw error;
     }
   }
