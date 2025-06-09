@@ -5,7 +5,7 @@ export const MenuOperations = {
   async getAllMenuItems() {
     try {
       const { data, error } = await supabase
-        .from('menu')
+        .from('menuitems')  // Changed from 'menu' to 'menuitems'
         .select('*')
         .order('menuid', { ascending: true });
       
@@ -21,7 +21,7 @@ export const MenuOperations = {
   async getMenuItem(menuId) {
     try {
       const { data, error } = await supabase
-        .from('menu')
+        .from('menuitems')  // Changed from 'menu' to 'menuitems'
         .select('*')
         .eq('menuid', menuId)
         .single();
@@ -38,7 +38,7 @@ export const MenuOperations = {
   async addMenuItem(menuData) {
     try {
       const { data, error } = await supabase
-        .from('menu')
+        .from('menuitems')  // Changed from 'menu' to 'menuitems'
         .insert([{
           itemname: menuData.itemname,
           price: menuData.price,
@@ -58,7 +58,7 @@ export const MenuOperations = {
   async updateMenuItem(menuId, menuData) {
     try {
       const { data, error } = await supabase
-        .from('menu')
+        .from('menuitems')  // Changed from 'menu' to 'menuitems'
         .update({
           itemname: menuData.itemname,
           price: menuData.price,
@@ -79,7 +79,7 @@ export const MenuOperations = {
   async deleteMenuItem(menuId) {
     try {
       const { data, error } = await supabase
-        .from('menu')
+        .from('menuitems')  // Changed from 'menu' to 'menuitems'
         .delete()
         .eq('menuid', menuId);
       
