@@ -62,10 +62,24 @@
     const transactionForm = document.getElementById('addTransactionForm');
     const transactionTableBody = document.getElementById('transactionTableBody');
 
-    // Format date for display
+    // Format date for display (local time)
     function formatDate(dateString) {
       const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
       return new Date(dateString).toLocaleDateString(undefined, options);
+    }
+
+    // Convert local datetime to UTC for storage
+    function localToUTC(localDateTime) {
+      const date = new Date(localDateTime);
+      return new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
+    }
+
+    // Convert UTC datetime to local for display in form
+    function utcToLocal(utcDateTime) {
+      const date = new Date(utcDateTime);
+      return new Date(date.getTime() + (date.getTimezoneOffset() * 60000))
+              .toISOString()
+              .slice(0, 16);
     }
 
     // Form submission handler
@@ -73,11 +87,11 @@
       event.preventDefault();
       const formData = new FormData(event.target);
       
-      // Convert datetime-local input to ISO string
-      const transactionDate = new Date(formData.get('transactiondate')).toISOString();
+      // Convert local datetime input to UTC for storage
+      const transactionDateUTC = localToUTC(formData.get('transactiondate'));
       
       const transactionData = {
-        transactiondate: transactionDate,
+        transactiondate: transactionDateUTC,
         transactiontype: formData.get('transactiontype'),
         totalamount: parseFloat(formData.get('totalamount')),
         customerid: formData.get('customerid') ? parseInt(formData.get('customerid')) : null,
@@ -150,13 +164,8 @@
       const transaction = await TransactionOperations.getTransaction(transactionId);
       
       // Fill form with transaction data
-      // Convert ISO date to datetime-local format
-      const date = new Date(transaction.transactiondate);
-      const localDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
-                          .toISOString()
-                          .slice(0, 16);
-      
-      transactionForm.transactiondate.value = localDateTime;
+      // Convert UTC date to local datetime format for the form
+      transactionForm.transactiondate.value = utcToLocal(transaction.transactiondate);
       transactionForm.transactiontype.value = transaction.transactiontype;
       transactionForm.totalamount.value = transaction.totalamount;
       transactionForm.customerid.value = transaction.customerid || '';

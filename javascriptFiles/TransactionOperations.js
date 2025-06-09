@@ -45,10 +45,11 @@ export const TransactionOperations = {
           totalamount: transactionData.totalamount,
           customerid: transactionData.customerid,
           employeeid: transactionData.employeeid
-        }]);
+        }])
+        .select();
       
       if (error) throw error;
-      return data;
+      return data[0];
     } catch (error) {
       console.error('Error adding transaction:', error.message);
       throw error;
@@ -67,10 +68,11 @@ export const TransactionOperations = {
           customerid: transactionData.customerid,
           employeeid: transactionData.employeeid
         })
-        .eq('transactionid', transactionId);
+        .eq('transactionid', transactionId)
+        .select();
       
       if (error) throw error;
-      return data;
+      return data[0];
     } catch (error) {
       console.error(`Error updating transaction ${transactionId}:`, error.message);
       throw error;
