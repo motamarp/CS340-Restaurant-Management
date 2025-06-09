@@ -1,13 +1,13 @@
 import { supabase } from './supabaseConfig.js';
 
 export const EmployeeOperations = {
-  // Get all employees
+  // Get all employees sorted by ID
   async getAllEmployees() {
     try {
       const { data, error } = await supabase
         .from('employees')
         .select('*')
-        .order('hiredate', { ascending: false });
+        .order('employeeid', { ascending: true });  // Changed to sort by ID
       
       if (error) throw error;
       return data;
