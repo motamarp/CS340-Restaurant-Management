@@ -7,7 +7,7 @@ export const EmployeeOperations = {
       const { data, error } = await supabase
         .from('employees')
         .select('*')
-        .order('employeeid', { ascending: true });
+        .order('hiredate', { ascending: false });
       
       if (error) throw error;
       return data;
@@ -39,14 +39,12 @@ export const EmployeeOperations = {
     try {
       const { data, error } = await supabase
         .from('employees')
-        .insert([
-          {
-            name: employeeData.name,
-            email: employeeData.email,
-            role: employeeData.role,
-            hiredate: new Date().toISOString()
-          }
-        ]);
+        .insert([{
+          name: employeeData.name,
+          email: employeeData.email,
+          role: employeeData.role,
+          hiredate: new Date().toISOString()
+        }]);
       
       if (error) throw error;
       return data;

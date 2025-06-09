@@ -1,46 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Employees</title>
+  <title>Employee Management</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    .edit-btn, .delete-btn {
-      padding: 5px 10px;
-      margin: 0 5px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .edit-btn {
-      background-color: #4CAF50;
-      color: white;
-    }
-    .delete-btn {
-      background-color: #f44336;
-      color: white;
-    }
-    select {
-      padding: 5px;
-      margin: 5px 0;
-    }
-  </style>
 </head>
 <body>
-  <h1>Employee List</h1>
+  <h1>Employee Management</h1>
   <a href="index.html">Back to Home</a>
 
   <!-- Employee Form -->
   <form id="addEmployeeForm">
-    <h2>Add Employee</h2>
-    <label>Name: <input type="text" name="name" required></label>
-    <label>Email: <input type="email" name="email" required></label>
-    <label>Role:
+    <h2>Add/Edit Employee</h2>
+    <label>
+      Name: 
+      <input type="text" name="name" required>
+    </label>
+    <label>
+      Email: 
+      <input type="email" name="email" required>
+    </label>
+    <label>
+      Role:
       <select name="role" required>
-        <option value="Manager">Manager</option>
-        <option value="Server">Server</option>
-        <option value="Chef">Chef</option>
-        <option value="Host">Host</option>
-        <option value="Bartender">Bartender</option>
+        <option value="Waiter">Waiter</option>
+        <option value="Cashier">Cashier</option>
+        <option value="Cook">Cook</option>
+        <option value="Delivery">Delivery</option>
       </select>
     </label>
     <button type="submit">Add Employee</button>
@@ -58,7 +43,7 @@
       </tr>
     </thead>
     <tbody id="employeeTableBody">
-      <!-- Data will be inserted here by JavaScript -->
+      <!-- Employee data will be loaded here -->
     </tbody>
   </table>
 
@@ -69,7 +54,7 @@
     const employeeForm = document.getElementById('addEmployeeForm');
     const employeeTableBody = document.getElementById('employeeTableBody');
 
-    // Single form submission handler
+    // Form submission handler
     employeeForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       const formData = new FormData(event.target);
@@ -116,14 +101,14 @@
             <td>${employee.email}</td>
             <td>${employee.role}</td>
             <td>${new Date(employee.hiredate).toLocaleDateString()}</td>
-            <td>
+            <td class="action-btns">
               <button class="edit-btn" data-id="${employee.employeeid}">Edit</button>
               <button class="delete-btn" data-id="${employee.employeeid}">Delete</button>
             </td>
           </tr>
         `).join('');
 
-        // Add event listeners to all buttons
+        // Add event listeners to buttons
         document.querySelectorAll('.delete-btn').forEach(btn => {
           btn.addEventListener('click', handleDelete);
         });
