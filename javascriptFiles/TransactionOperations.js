@@ -1,5 +1,46 @@
 import { supabase } from './supabaseConfig.js';
 
+// Customer Operations for ID validation
+export const CustomerOperations = {
+  async getCustomer(customerId) {
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('customerid')
+        .eq('customerid', customerId)
+        .single();
+      
+      if (error) throw error;
+      if (!data) throw new Error('Customer not found');
+      return data;
+    } catch (error) {
+      console.error(`Error fetching customer ${customerId}:`, error.message);
+      throw error;
+    }
+  }
+};
+
+// Employee Operations for ID validation
+export const EmployeeOperations = {
+  async getEmployee(employeeId) {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('employeeid')
+        .eq('employeeid', employeeId)
+        .single();
+      
+      if (error) throw error;
+      if (!data) throw new Error('Employee not found');
+      return data;
+    } catch (error) {
+      console.error(`Error fetching employee ${employeeId}:`, error.message);
+      throw error;
+    }
+  }
+};
+
+// Transaction Operations
 export const TransactionOperations = {
   // Get all transactions sorted by ID
   async getAllTransactions() {

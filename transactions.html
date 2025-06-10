@@ -3,6 +3,16 @@
 <head>
   <title>Transaction Management</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .error-message {
+      color: #d32f2f;
+      font-size: 0.8em;
+      margin-top: 4px;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <h1>Transaction Management</h1>
@@ -26,10 +36,12 @@
     <label>
       Customer ID: 
       <input type="number" name="customerid">
+      <div id="customerError" class="error-message hidden"></div>
     </label>
     <label>
       Employee ID: 
       <input type="number" name="employeeid" required>
+      <div id="employeeError" class="error-message hidden"></div>
     </label>
     <label>
       Total Amount: 
@@ -56,13 +68,15 @@
   </table>
 
   <script type="module">
-    import { TransactionOperations } from './javascriptFiles/TransactionOperations.js';
+    import { TransactionOperations, CustomerOperations, EmployeeOperations } from './javascriptFiles/TransactionOperations.js';
 
     // DOM Elements
     const transactionForm = document.getElementById('addTransactionForm');
     const transactionTableBody = document.getElementById('transactionTableBody');
+    const customerError = document.getElementById('customerError');
+    const employeeError = document.getElementById('employeeError');
 
-    // Format date for display (local time)
+    // Format date for display
     function formatDate(dateString) {
       const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
       return new Date(dateString).toLocaleDateString(undefined, options);
@@ -82,23 +96,52 @@
               .slice(0, 16);
     }
 
-    // Form submission handler
+    // Form submission handler with ID validation
     transactionForm.addEventListener('submit', async (event) => {
       event.preventDefault();
+      
+      // Clear previous error messages
+      customerError.textContent = '';
+      customerError.classList.add('hidden');
+      employeeError.textContent = '';
+      employeeError.classList.add('hidden');
+
       const formData = new FormData(event.target);
-      
-      // Convert local datetime input to UTC for storage
-      const transactionDateUTC = localToUTC(formData.get('transactiondate'));
-      
-      const transactionData = {
-        transactiondate: transactionDateUTC,
-        transactiontype: formData.get('transactiontype'),
-        totalamount: parseFloat(formData.get('totalamount')),
-        customerid: formData.get('customerid') ? parseInt(formData.get('customerid')) : null,
-        employeeid: parseInt(formData.get('employeeid'))
-      };
+      const customerId = formData.get('customerid') ? parseInt(formData.get('customerid')) : null;
+      const employeeId = parseInt(formData.get('employeeid'));
       
       try {
+        // Validate customer ID if provided
+        if (customerId) {
+          try {
+            await CustomerOperations.getCustomer(customerId);
+          } catch (error) {
+            customerError.textContent = 'Customer ID not found';
+            customerError.classList.remove('hidden');
+            throw new Error('Invalid customer ID');
+          }
+        }
+
+        // Validate employee ID
+        try {
+          await EmployeeOperations.getEmployee(employeeId);
+        } catch (error) {
+          employeeError.textContent = 'Employee ID not found';
+          employeeError.classList.remove('hidden');
+          throw new Error('Invalid employee ID');
+        }
+
+        // Convert local datetime input to UTC for storage
+        const transactionDateUTC = localToUTC(formData.get('transactiondate'));
+        
+        const transactionData = {
+          transactiondate: transactionDateUTC,
+          transactiontype: formData.get('transactiontype'),
+          totalamount: parseFloat(formData.get('totalamount')),
+          customerid: customerId,
+          employeeid: employeeId
+        };
+        
         if (transactionForm.dataset.editId) {
           // Update existing transaction
           await TransactionOperations.updateTransaction(transactionForm.dataset.editId, transactionData);
@@ -111,8 +154,10 @@
         transactionForm.reset();
         await renderTransactions();
       } catch (error) {
-        console.error('Error:', error);
-        alert(`Operation failed: ${error.message}`);
+        if (!error.message.includes('Invalid')) {
+          console.error('Error:', error);
+          alert(`Operation failed: ${error.message}`);
+        }
       }
     });
 
@@ -164,7 +209,6 @@
       const transaction = await TransactionOperations.getTransaction(transactionId);
       
       // Fill form with transaction data
-      // Convert UTC date to local datetime format for the form
       transactionForm.transactiondate.value = utcToLocal(transaction.transactiondate);
       transactionForm.transactiontype.value = transaction.transactiontype;
       transactionForm.totalamount.value = transaction.totalamount;
